@@ -17,7 +17,7 @@ const play = new Audio("sons/play.wav");
 const pause = new Audio("sons/pause.mp3");
 const beep = new Audio("sons/softbeep.wav");
 
-let tempoDecorridoeEmSegundos = 1500;
+let tempoDecorridoeEmSegundos = 5;
 let intervaloId = null;
 
 musica.loop = true;
@@ -96,7 +96,13 @@ function alterarContexto(contexto) {
 const contagemRegressiva = () => {
   if (tempoDecorridoeEmSegundos <= 0) {
     beep.play();
+
     alert("Tempo finalizado!");
+    const focoAtivo = html.getAttribute("data-contexto") == "foco";
+    if (focoAtivo) {
+      const evento = new CustomEvent("FocoFinalizado");
+      document.dispatchEvent(evento);
+    }
     zerar();
     return;
   }
@@ -136,3 +142,4 @@ function mostrarTempo() {
   tempoNaTela.innerHTML = `${tempoFormatado}`;
 }
 mostrarTempo();
+alterarContexto("foco");
