@@ -3,11 +3,12 @@ const formAdicionarTarefa = document.querySelector(".app__form-add-task");
 const textarea = document.querySelector(".app__form-textarea");
 const ulTarefa = document.querySelector(".app__section-task-list");
 const btnCancelar = document.querySelector(".app__form-footer__button--cancel");
+const btnRemoverConcluidas = document.querySelector("#btn-remover-concluidas");
 const paragrafoDescricaoTarefa = document.querySelector(
   ".app__section-active-task-description"
 );
 
-const tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
+let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
 let tarefaSelecionada = null;
 let liTarefaSelecionada = null;
 
@@ -60,28 +61,29 @@ function criarElementoTarefa(tarefa) {
     li.classList.add("app__section-task-list-item-complete");
     botao.setAttribute("disabled", "disabled");
   } else {
-    li.onclick = () => {
-      // Seleciona todos os itens com a classe ativa e remove a classe deles
-      document
-        .querySelectorAll(".app__section-task-list-item-active")
-        .forEach((elemento) => {
-          elemento.classList.remove("app__section-task-list-item-active");
-        });
-      if (tarefaSelecionada == tarefa) {
-        paragrafoDescricaoTarefa.textContent = "";
-        tarefaSelecionada = null;
-        liTarefaSelecionada = null;
-        return; //se não for uma tarefa clicada novamente, não precisa fazer nada
-      }
-      tarefaSelecionada = tarefa;
-      liTarefaSelecionada = li;
-      // Atualiza o conteúdo do parágrafo com a descrição da tarefa
-      paragrafoDescricaoTarefa.textContent = tarefa.descricao;
-
-      // Adiciona a classe ativa ao item atual
-      li.classList.add("app__section-task-list-item-active");
-    };
   }
+
+  li.onclick = () => {
+    // Seleciona todos os itens com a classe ativa e remove a classe deles
+    document
+      .querySelectorAll(".app__section-task-list-item-active")
+      .forEach((elemento) => {
+        elemento.classList.remove("app__section-task-list-item-active");
+      });
+    if (tarefaSelecionada == tarefa) {
+      paragrafoDescricaoTarefa.textContent = "";
+      tarefaSelecionada = null;
+      liTarefaSelecionada = null;
+      return; //se não for uma tarefa clicada novamente, não precisa fazer nada
+    }
+    tarefaSelecionada = tarefa;
+    liTarefaSelecionada = li;
+    // Atualiza o conteúdo do parágrafo com a descrição da tarefa
+    paragrafoDescricaoTarefa.textContent = tarefa.descricao;
+
+    // Adiciona a classe ativa ao item atual
+    li.classList.add("app__section-task-list-item-active");
+  };
 
   return li;
 }
@@ -126,3 +128,12 @@ document.addEventListener("FocoFinalizado", () => {
     atualizarTarefas();
   }
 });
+
+btnRemoverConcluidas.onclick = () => {
+  const seletor = ".app__section-task-list-item-complete";
+  document.querySelectorAll(seletor).forEach((elemento) => {
+    elemento.remove();
+  });
+  tarefas = tarefas.filter((tarefa) => !tarefa.completa);
+  atualizarTarefas();
+};
