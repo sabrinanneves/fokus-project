@@ -1,68 +1,67 @@
-// encontrar o botão adicionar tarefa
-
 const btnAdicionarTarefa = document.querySelector(".app__button--add-task");
 const formAdicionarTarefa = document.querySelector(".app__form-add-task");
 const textarea = document.querySelector(".app__form-textarea");
-const ulTarefas = document.querySelector(".app__section-task-list");
+const ulTarefa = document.querySelector(".app__section-task-list");
+const btnCancelar = document.querySelector(".app__form-footer__button--cancel");
 const paragrafoDescricaoTarefa = document.querySelector(
   ".app__section-active-task-description"
 );
 
-const btnRemoverConcluidas = document.querySelector("#btn-remover-concluidas");
-const btnRemoverTodas = document.querySelector("#btn-remover-todas");
-
-let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
+const tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
 let tarefaSelecionada = null;
 let liTarefaSelecionada = null;
+
+const limparFormulario = () => {
+  formAdicionarTarefa.classList.add("hidden");
+  textarea.value = "";
+};
 
 function atualizarTarefas() {
   localStorage.setItem("tarefas", JSON.stringify(tarefas));
 }
 
+//riamos o método que transforma uma tarefa em um HTML que representa uma tarefa,
 function criarElementoTarefa(tarefa) {
   const li = document.createElement("li");
   li.classList.add("app__section-task-list-item");
 
   const svg = document.createElement("svg");
-  svg.innerHTML = `
-        <svg class="app__section-task-icon-status" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="12" fill="#FFF"></circle>
-            <path d="M9 16.1719L19.5938 5.57812L21 6.98438L9 18.9844L3.42188 13.4062L4.82812 12L9 16.1719Z"
-                fill="#01080E"></path>
-        </svg>
-    `;
+  svg.innerHTML = `  
+  <svg class="app__section-task-icon-status" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="12" fill="#FFF"></circle>
+      <path d="M9 16.1719L19.5938 5.57812L21 6.98438L9 18.9844L3.42188 13.4062L4.82812 12L9 16.1719Z" fill="#01080E"></path>
+  </svg>
+  `;
+
   const paragrafo = document.createElement("p");
-  paragrafo.textContent = tarefa.descricao;
   paragrafo.classList.add("app__section-task-list-item-description");
+  paragrafo.textContent = tarefa.descricao;
 
   const botao = document.createElement("button");
   botao.classList.add("app_button-edit");
 
+  // pegamos a nova descrição do prompt, atualizamos o parágrafo que é a camada visual, atualizamos a referência da tarefa, ou seja, a camada de dados e, por fim, fizemos o update do localStorage.
   botao.onclick = () => {
-    // debugger
     const novaDescricao = prompt("Qual é o novo nome da tarefa?");
-    // console.log('Nova descrição da tarefa: ', novaDescricao)
-    if (novaDescricao) {
-      paragrafo.textContent = novaDescricao;
-      tarefa.descricao = novaDescricao;
-      atualizarTarefas();
-    }
+    //debugger;
+    if (!novaDescricao) return; //se o prompt não retornar um valor, não atualiza a tarefa
+    paragrafo.textContent = novaDescricao;
+    tarefa.descricao = novaDescricao; //atualizar a tarefa no array
+    atualizarTarefas();
   };
 
   const imagemBotao = document.createElement("img");
   imagemBotao.setAttribute("src", "./imagens/edit.png");
   botao.append(imagemBotao);
 
-  li.append(svg);
-  li.append(paragrafo);
-  li.append(botao);
+  li.append(svg, paragrafo, botao); // append coloca tudo dentro
 
   if (tarefa.completa) {
     li.classList.add("app__section-task-list-item-complete");
     botao.setAttribute("disabled", "disabled");
   } else {
     li.onclick = () => {
+      // Seleciona todos os itens com a classe ativa e remove a classe deles
       document
         .querySelectorAll(".app__section-task-list-item-active")
         .forEach((elemento) => {
@@ -72,12 +71,14 @@ function criarElementoTarefa(tarefa) {
         paragrafoDescricaoTarefa.textContent = "";
         tarefaSelecionada = null;
         liTarefaSelecionada = null;
-        return;
+        return; //se não for uma tarefa clicada novamente, não precisa fazer nada
       }
       tarefaSelecionada = tarefa;
       liTarefaSelecionada = li;
+      // Atualiza o conteúdo do parágrafo com a descrição da tarefa
       paragrafoDescricaoTarefa.textContent = tarefa.descricao;
 
+      // Adiciona a classe ativa ao item atual
       li.classList.add("app__section-task-list-item-active");
     };
   }
@@ -85,26 +86,33 @@ function criarElementoTarefa(tarefa) {
   return li;
 }
 
+btnCancelar.addEventListener("click", limparFormulario);
+
 btnAdicionarTarefa.addEventListener("click", () => {
-  formAdicionarTarefa.classList.toggle("hidden");
+  formAdicionarTarefa.classList.toggle("hidden"); //formulario aparecer e desaparecer
 });
 
+// In this code snippet, we've added a form to add tasks to a list. When the user submits the form, the new task is added to the `tarefas` array and saved to localStorage. The form is also hidden and displayed when the "Adicionar tarefa" button is clicked.
+
 formAdicionarTarefa.addEventListener("submit", (evento) => {
-  evento.preventDefault();
+  evento.preventDefault(); //prevenir comportamento padrao //prevenir a submissão natural de um formulário em JavaScript //Ao enviar o formulário, você precisa garantir que a página não atualize.\
+
   const tarefa = {
     descricao: textarea.value,
   };
+  console.log(tarefa.descricao);
   tarefas.push(tarefa);
   const elementoTarefa = criarElementoTarefa(tarefa);
-  ulTarefas.append(elementoTarefa);
+  ulTarefa.append(elementoTarefa);
   atualizarTarefas();
-  textarea.value = "";
-  formAdicionarTarefa.classList.add("hidden");
+  textarea.value = ""; //limpar o textarea
+  formAdicionarTarefa.classList.add("hidden"); //formulario aparecer e desaparecer
 });
 
 tarefas.forEach((tarefa) => {
+  // Array.prototype.forEach() é uma função que executa uma função fornecida para cada elemento do array, um de cada vez.
   const elementoTarefa = criarElementoTarefa(tarefa);
-  ulTarefas.append(elementoTarefa);
+  ulTarefa.append(elementoTarefa);
 });
 
 document.addEventListener("FocoFinalizado", () => {
@@ -118,21 +126,3 @@ document.addEventListener("FocoFinalizado", () => {
     atualizarTarefas();
   }
 });
-
-const removerTarefas = (somenteCompletas) => {
-  // const seletor = somenteCompletas ? ".app__section-task-list-item-complete" : ".app__section-task-list-item"
-  let seletor = ".app__section-task-list-item";
-  if (somenteCompletas) {
-    seletor = ".app__section-task-list-item-complete";
-  }
-  document.querySelectorAll(seletor).forEach((elemento) => {
-    elemento.remove();
-  });
-  tarefas = somenteCompletas
-    ? tarefas.filter((tarefa) => !tarefa.completa)
-    : [];
-  atualizarTarefas();
-};
-
-btnRemoverConcluidas.onclick = () => removerTarefas(true);
-btnRemoverTodas.onclick = () => removerTarefas(false);
